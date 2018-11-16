@@ -6,28 +6,98 @@ import * as math from "mathjs";
 
 class App extends Component {
   state = {
-    input: ""
+    input: "0",
+    canDecimal: true,
+    lastOperator: ""
   };
 
   handleClear = () => {
     this.setState({
-      input: ""
+      input: "0",
+      canDecimal: true
     });
   };
 
   addToInput = val => {
-    console.log(val);
-    this.setState({
-      input: this.state.input + val
-    });
+    switch (val) {
+      case "0":
+        if (this.state.input === "0") {
+          return;
+        } else {
+          this.setState({
+            input: this.state.input + val,
+            canDecimal: !isNaN(val),
+            lastOperator: ""
+          });
+        }
+        break;
+      case ".":
+        if (!this.state.canDecimal) {
+          return;
+        } else {
+          this.setState({
+            input: this.state.input + val,
+            canDecimal: false
+          });
+
+          return;
+        }
+      case "+":
+      case "-":
+      case "*":
+      case "/":
+        if (this.state.lastOperator !== "") {
+          const newVal = this.state.input.slice(0, this.state.input.length - 1);
+          this.setState({
+            input: newVal + val,
+            canDecimal: false,
+            lastOperator: val
+          });
+        } else {
+          this.setState({
+            input: this.state.input + val,
+            canDecimal: false,
+            lastOperator: val
+          });
+        }
+        break;
+      default:
+        if (this.state.input === "0" || this.state.input === "Error") {
+          this.setState({
+            input: val
+          });
+        } else {
+          const splitted = this.state.input.split("");
+          const lastOperator = Math.max(
+            splitted.lastIndexOf("+"),
+            Math.max(
+              splitted.lastIndexOf("-"),
+              Math.max(splitted.lastIndexOf("*"), splitted.lastIndexOf("/"))
+            )
+          );
+          this.setState({
+            input: this.state.input + val,
+            lastOperator: "",
+            canDecimal: splitted.lastIndexOf(".") < lastOperator
+          });
+        }
+    }
   };
 
   calculate = () => {
-    const result = String(math.eval(this.state.input));
-
-    if (typeof result !== "undefined") {
+    try {
+      const expression = math.eval(this.state.input);
+      const result = String(expression);
+      console.log(result % 1);
+      if (typeof result !== "undefined") {
+        this.setState({
+          input: result,
+          canDecimal: result === Math.floor(result) ? true : false
+        });
+      }
+    } catch (error) {
       this.setState({
-        input: result
+        input: "Error"
       });
     }
   };
@@ -39,33 +109,71 @@ class App extends Component {
           <div className="calc-wrapper">
             <Input input={this.state.input} />
             <div className="row advanced">
-              <Button handleClick={this.handleClear}>AC</Button>
-              <Button handleClick={this.addToInput}>+/-</Button>
-              <Button handleClick={this.addToInput}>%</Button>
-              <Button handleClick={this.addToInput}>/</Button>
+              <Button handleClick={this.handleClear} id="clear">
+                AC
+              </Button>
+              <Button handleClick={this.addToInput} id="unary">
+                +/-
+              </Button>
+              <Button handleClick={this.addToInput} id="mod">
+                %
+              </Button>
+              <Button handleClick={this.addToInput} id="divide">
+                /
+              </Button>
             </div>
             <div className="row">
-              <Button handleClick={this.addToInput}>7</Button>
-              <Button handleClick={this.addToInput}>8</Button>
-              <Button handleClick={this.addToInput}>9</Button>
-              <Button handleClick={this.addToInput}>*</Button>
+              <Button handleClick={this.addToInput} id="seven">
+                7
+              </Button>
+              <Button handleClick={this.addToInput} id="eight">
+                8
+              </Button>
+              <Button handleClick={this.addToInput} id="nine">
+                9
+              </Button>
+              <Button handleClick={this.addToInput} id="multiply">
+                *
+              </Button>
             </div>
             <div className="row">
-              <Button handleClick={this.addToInput}>4</Button>
-              <Button handleClick={this.addToInput}>5</Button>
-              <Button handleClick={this.addToInput}>6</Button>
-              <Button handleClick={this.addToInput}>-</Button>
+              <Button handleClick={this.addToInput} id="four">
+                4
+              </Button>
+              <Button handleClick={this.addToInput} id="five">
+                5
+              </Button>
+              <Button handleClick={this.addToInput} id="six">
+                6
+              </Button>
+              <Button handleClick={this.addToInput} id="subtract">
+                -
+              </Button>
             </div>
             <div className="row">
-              <Button handleClick={this.addToInput}>1</Button>
-              <Button handleClick={this.addToInput}>2</Button>
-              <Button handleClick={this.addToInput}>3</Button>
-              <Button handleClick={this.addToInput}>+</Button>
+              <Button handleClick={this.addToInput} id="one">
+                1
+              </Button>
+              <Button handleClick={this.addToInput} id="two">
+                2
+              </Button>
+              <Button handleClick={this.addToInput} id="three">
+                3
+              </Button>
+              <Button handleClick={this.addToInput} id="add">
+                +
+              </Button>
             </div>
             <div className="row big-button">
-              <Button handleClick={this.addToInput}>0</Button>
-              <Button handleClick={this.addToInput}>.</Button>
-              <Button handleClick={this.calculate}>=</Button>
+              <Button handleClick={this.addToInput} id="zero">
+                0
+              </Button>
+              <Button handleClick={this.addToInput} id="decimal">
+                .
+              </Button>
+              <Button handleClick={this.calculate} id="equals">
+                =
+              </Button>
             </div>
           </div>
         </div>

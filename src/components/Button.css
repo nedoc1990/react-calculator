@@ -11,6 +11,12 @@
   outline: 1px solid #5c5858;
 }
 
+.button-wrapper:hover {
+  color: black;
+  outline: 0.05em solid rgb(194, 189, 189);
+  z-index: 3;
+}
+
 .operator {
   background-color: #fe9241;
   color: white;
